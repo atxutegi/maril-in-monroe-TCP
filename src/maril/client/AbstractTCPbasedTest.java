@@ -52,7 +52,7 @@ public abstract class AbstractTCPbasedTest {
     
     protected long totalDown;
     protected long totalUp;
-    protected int chunksize;
+    protected int framesize;
     protected byte[] buf;
 
     
@@ -140,24 +140,24 @@ public abstract class AbstractTCPbasedTest {
         final Scanner scanner = new Scanner(line);
         try
         {
-        	if (response.equals("CHUNKSIZE")) {
+        	if (response.equals("FRAMESIZE")) {
                 if (!response.equals(scanner.next()))
                 {
-                    log(String.format(Locale.US, "thread %d: got '%s' expected 'CHUNKSIZE'", threadId, line));
+                    log(String.format(Locale.US, "thread %d: got '%s' expected 'FRAMESIZE'", threadId, line));
                     return null;
                 }
                 try
                 {
-                    chunksize = scanner.nextInt();
-                    log(String.format(Locale.US, "thread %d: CHUNKSIZE is %d", threadId, chunksize));
+                    framesize = scanner.nextInt();
+                    log(String.format(Locale.US, "thread %d: FRAMESIZE is %d", threadId, framesize));
                 }
                 catch (final Exception e)
                 {
-                    log(String.format(Locale.US, "thread %d: invalid CHUNKSIZE: '%s'", threadId, line));
+                    log(String.format(Locale.US, "thread %d: invalid FRAMECSIZE: '%s'", threadId, line));
                     return null;
                 }
-                if (buf == null || buf != null && buf.length != chunksize)
-                    buf = new byte[chunksize];
+                if (buf == null || buf != null && buf.length != framesize)
+                    buf = new byte[framesize];
                 
                 s.setSoTimeout(0);
                 return s;        		
@@ -177,7 +177,7 @@ public abstract class AbstractTCPbasedTest {
     
     protected Socket connect(final TestResult testResult) throws IOException
     {
-    	return connect(testResult, InetAddress.getByName(params.getHost()), params.getPort(), "CHUNKSIZE", 20000);
+    	return connect(testResult, InetAddress.getByName(params.getHost()), params.getPort(), "FRAMESIZE", 20000);
     }
     
     /**

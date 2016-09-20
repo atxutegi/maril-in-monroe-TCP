@@ -300,16 +300,16 @@ public class TCPbasedTest extends AbstractTCPbasedTest implements Callable<Threa
             }
             try
             {
-                chunksize = scanner.nextInt();
-                log(String.format(Locale.US, "thread %d: FRAMESIZE is %d", threadId, chunksize));
+                framesize = scanner.nextInt();
+                log(String.format(Locale.US, "thread %d: FRAMESIZE is %d", threadId, framesize));
             }
             catch (final Exception e)
             {
                 log(String.format(Locale.US, "thread %d: invalid FRAMESIZE: '%s'", threadId, line));
                 return null;
             }
-            if (buf == null || buf != null && buf.length != chunksize)
-                buf = new byte[chunksize];
+            if (buf == null || buf != null && buf.length != framesize)
+                buf = new byte[framesize];
             return s;
         }
         finally
@@ -336,15 +336,15 @@ public class TCPbasedTest extends AbstractTCPbasedTest implements Callable<Threa
             if (params.getPreTest() == true)/***** short download *****/
             {
                 final long targetTimeEnd = System.nanoTime() + params.getPretestDuration() * nsecsL;
-                int chunks = 1;
+                int frames = 1;
                 do
                 {
-                    downloadChunks(chunks);
-                    chunks *= 2;
+                    downloadFrames(frames);
+                    frames *= 2;
                 }
                 while (System.nanoTime() < targetTimeEnd);
                 
-                if (chunks <= 4)
+                if (frames <= 4)
                     // connection is quite slow, we'll only use 1 thread
                     fallbackToOneThread.set(true);
             }
@@ -462,11 +462,11 @@ public class TCPbasedTest extends AbstractTCPbasedTest implements Callable<Threa
                     curTime.set(0);
                     
                     final long targetTimeEnd = System.nanoTime() + params.getPretestDuration() * nsecsL;
-                    int chunks = 1;
+                    int frames = 1;
                     do
                     {
-                        uploadChunks(chunks);
-                        chunks *= 2;
+                        uploadFrames(frames);
+                        frames *= 2;
                     }
                     while (System.nanoTime() < targetTimeEnd);
                 }
@@ -538,15 +538,15 @@ public class TCPbasedTest extends AbstractTCPbasedTest implements Callable<Threa
         return testResult;
     }
     
-    private void downloadChunks(final int chunks) throws InterruptedException, IOException
+    private void downloadFrames(final int frames) throws InterruptedException, IOException
     {
         if (Thread.interrupted())
             throw new InterruptedException();
         
-        if (chunks < 1)
+        if (frames < 1)
             throw new IllegalArgumentException();
         
-        log(String.format(Locale.US, "thread %d: getting %d chunk(s)", threadId, chunks));
+        log(String.format(Locale.US, "thread %d: getting %d frame(s)", threadId, frames));
         
         String line = reader.readLine();
         if (line == null)
@@ -558,11 +558,10 @@ public class TCPbasedTest extends AbstractTCPbasedTest implements Callable<Threa
         }
         
         String send;
-        send = String.format(Locale.US, "REQUESTFRAME %d\n", chunks);
+        send = String.format(Locale.US, "REQUESTFRAME %d\n", frames);
         out.write(send.getBytes("US-ASCII"));
         out.flush();
         
-        // long expectBytes = chunksize * chunks;
         long totalRead = 0;
         long read;
         byte lastByte = (byte) 0;
@@ -573,7 +572,7 @@ public class TCPbasedTest extends AbstractTCPbasedTest implements Callable<Threa
             read = in.read(buf);
             if (read > 0)
             {
-                final int posLast = chunksize - 1 - (int) (totalRead % chunksize);
+                final int posLast = framesize - 1 - (int) (totalRead % framesize);
                 if (read > posLast)
                     lastByte = buf[posLast];
                 totalRead += read;
@@ -641,7 +640,7 @@ public class TCPbasedTest extends AbstractTCPbasedTest implements Callable<Threa
             read = in.read(buf);
             if (read > 0)
             {
-                final int posLast = chunksize - 1 - (int) (totalRead % chunksize);
+                final int posLast = framesize - 1 - (int) (totalRead % framesize);
                 if (read > posLast)
                     lastByte = buf[posLast];
                 totalRead += read;
@@ -686,15 +685,15 @@ public class TCPbasedTest extends AbstractTCPbasedTest implements Callable<Threa
         
     }
     
-    private void uploadChunks(final int chunks) throws InterruptedException, IOException
+    private void uploadFrames(final int frames) throws InterruptedException, IOException
     {
         if (Thread.interrupted())
             throw new InterruptedException();
         
-        if (chunks < 1)
+        if (frames < 1)
             throw new IllegalArgumentException();
         
-        log(String.format(Locale.US, "thread %d: putting %d chunk(s)", threadId, chunks));
+        log(String.format(Locale.US, "thread %d: putting %d frame(s)", threadId, frames));
         
         String line = reader.readLine();
         if (line == null)
@@ -714,14 +713,14 @@ public class TCPbasedTest extends AbstractTCPbasedTest implements Callable<Threa
         if (!line.equals("ACK"))
             throw new IllegalStateException();
         
-        buf[chunksize - 1] = (byte) 0; // set last byte to continue value
+        buf[framesize - 1] = (byte) 0; // set last byte to continue value
         
-        for (int i = 0; i < chunks; i++)
+        for (int i = 0; i < frames; i++)
         {
-            if (i == chunks - 1)
-                buf[chunksize - 1] = (byte) 0xff; // set last byte to
+            if (i == frames - 1)
+                buf[framesize - 1] = (byte) 0xff; // set last byte to
                                                   // termination value
-            out.write(buf, 0, chunksize);
+            out.write(buf, 0, framesize);
         }
         
         line = reader.readLine(); // TIME line
@@ -834,7 +833,7 @@ public class TCPbasedTest extends AbstractTCPbasedTest implements Callable<Threa
         });
         
         final long maxnsecs = seconds * 1000000000L;
-        buf[chunksize - 1] = (byte) 0x00; // set last byte to continue value
+        buf[framesize - 1] = (byte) 0x00; // set last byte to continue value
         
         final byte[] bufTx = buf.clone();
         final AtomicBoolean terminateTx = new AtomicBoolean(false);
@@ -849,14 +848,14 @@ public class TCPbasedTest extends AbstractTCPbasedTest implements Callable<Threa
                     if (terminateTx.get())
                     {
                         // last package
-                        bufTx[chunksize - 1] = (byte) 0xff; // set last byte to termination value
-                        out.write(bufTx, 0, chunksize);
+                        bufTx[framesize - 1] = (byte) 0xff; // set last byte to termination value
+                        out.write(bufTx, 0, framesize);
                         // forces buffered bytes to be written out.
                         out.flush();
                         return null;
                     }
                     else
-                        out.write(bufTx, 0, chunksize);
+                        out.write(bufTx, 0, framesize);
                 }
             }
         });
