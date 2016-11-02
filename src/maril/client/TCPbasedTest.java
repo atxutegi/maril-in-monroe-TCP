@@ -333,7 +333,9 @@ public class TCPbasedTest extends AbstractTCPbasedTest implements Callable<Threa
             log(String.format(Locale.US, "thread %d: connected, waiting for rest...", threadId));
             barrier.await();
             
-            if (params.getPreTest() == true)/***** short download *****/
+            log(String.format(Locale.US, "thread %d: PRETEST %d", threadId,params.getPreTest()));
+            
+            if (params.getPreTest() == 1)/***** short download *****/
             {
                 final long targetTimeEnd = System.nanoTime() + params.getPretestDuration() * nsecsL;
                 int frames = 1;
@@ -451,7 +453,7 @@ public class TCPbasedTest extends AbstractTCPbasedTest implements Callable<Threa
                 setStatus(TestStatus.INIT_UP);
                 stopTrafficService(TestStatus.DOWN);
                 
-                if (params.getPreTest() == true)/***** short upload *****/
+                if (params.getPreTest() == 1)/***** short upload *****/
                 {
                     if (!_fallbackToOneThread)
                         barrier.await();

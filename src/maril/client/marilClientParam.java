@@ -112,7 +112,7 @@ public class marilClientParam
     {
         
         final testParameters params = getTestParameter(overrideParams);
-        System.out.println("1.- Host " + params.getHost() + " port " + params.getPort() + " uuid " + params.getToken() + " duration " + params.getDuration() + " threads " + params.getNumThreads());
+        System.out.println("1.- Host " + params.getHost() + " port " + params.getPort() + " uuid " + params.getToken() + " duration " + params.getDuration() + " threads " + params.getNumThreads() + " preTest " + params.getPreTest());
         
         return new marilClientParam(params);
     }
@@ -131,7 +131,7 @@ public class marilClientParam
         int numPings = 0;
         long testTime = 0;
         String uuid = "";
-        boolean pre_test = true;
+        int pre_test = 1;
                 
         if (overrideParams != null)
         {
@@ -147,10 +147,10 @@ public class marilClientParam
             if (overrideParams.getNumPings() > 0)
                 numPings = overrideParams.getNumPings();
             testTime = System.currentTimeMillis();
-            if (overrideParams.getPreTest() != true)
+            if (overrideParams.getPreTest() != 1)
                 pre_test = overrideParams.getPreTest();
         }
-        System.out.println("2.- Host " + host + " port " + port + " uuid " + uuid + " duration " + duration + " threads " + numThreads);
+        System.out.println("2.- Host " + host + " port " + port + " uuid " + uuid + " duration " + duration + " threads " + numThreads + " preTest " + pre_test);
         return new testParameters(host, port, overrideParams.getToken(), duration, numThreads, numPings, testTime, pre_test);
     }
     

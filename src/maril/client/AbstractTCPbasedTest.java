@@ -119,7 +119,7 @@ public abstract class AbstractTCPbasedTest {
             return null;
         }
         
-        final String send = String.format(Locale.US, "TOKEN %s\n", params.getToken());
+        final String send = String.format(Locale.US, "FINGERPRINT %s\n", params.getToken());
         
         out.write(send.getBytes("US-ASCII"));
         
@@ -153,7 +153,7 @@ public abstract class AbstractTCPbasedTest {
                 }
                 catch (final Exception e)
                 {
-                    log(String.format(Locale.US, "thread %d: invalid FRAMECSIZE: '%s'", threadId, line));
+                    log(String.format(Locale.US, "thread %d: invalid FRAMESIZE: '%s'", threadId, line));
                     return null;
                 }
                 if (buf == null || buf != null && buf.length != framesize)

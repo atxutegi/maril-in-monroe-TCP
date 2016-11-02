@@ -38,10 +38,10 @@ public class testParameters
     private final int numThreads;
     private final int numPings;
     private final long startTime;
-    private final boolean pre_test;
+    private final int pre_test;
     
     public testParameters(final String host, final int port, final String token,
-            final int duration, final int numThreads, final int numPings, final long startTime, final boolean pre_test)
+            final int duration, final int numThreads, final int numPings, final long startTime, final int pre_test)
     {
         super();
         this.host = host;
@@ -55,7 +55,7 @@ public class testParameters
     }
     
     public testParameters(final String host, final int port, final String token,
-            final int duration, final int numThreads, final int numPings, final boolean pre_test)
+            final int duration, final int numThreads, final int numPings, final int pre_test)
     {
         super();
         this.host = host;
@@ -118,7 +118,7 @@ public class testParameters
         return startTime;
     }
     
-    public boolean getPreTest()
+    public int getPreTest()
     {
         return pre_test;
     }

@@ -66,8 +66,8 @@ public static void main(final String[] args) throws IOException, InterruptedExce
             acceptsAll(Arrays.asList("d", "duration"), "test duration in seconds")
                     .withRequiredArg().ofType(Integer.class);
             
-            acceptsAll(Arrays.asList("pre", "pre-test"), "pre-test yes/no")
-                    .withRequiredArg().ofType(Boolean.class);
+            acceptsAll(Arrays.asList("e", "preTest"), "pre-test enabler yes/no 1/0")
+                    .withRequiredArg().ofType(Integer.class);
 
         }
     };
@@ -113,7 +113,7 @@ public static void main(final String[] args) throws IOException, InterruptedExce
     int port = 3446;
     //int port = 5231;
     
-    boolean pre_test=true;
+    int preTest=1;
 
     final ArrayList<String> geoInfo = null;
 
@@ -131,12 +131,12 @@ public static void main(final String[] args) throws IOException, InterruptedExce
         port = (Integer) options.valueOf("p");
     if (options.has("d"))
         duration = (Integer) options.valueOf("d");
-    if (options.has("pre"))
-        pre_test = (boolean) options.valueOf("pre");
+    if (options.has("e"))
+        preTest = (Integer) options.valueOf("e");
 
     int numPings = 10;
     
-    testParameters finalParameters = new testParameters(host, port, uuid, duration, numThreads, numPings, pre_test);
+    testParameters finalParameters = new testParameters(host, port, uuid, duration, numThreads, numPings, preTest);
 
 
     // standard mode with contact to control server
